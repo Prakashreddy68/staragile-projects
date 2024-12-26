@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetPlay - Online Sports Betting Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34a853;
+            --danger-color: #ea4335;
+            --background-light: #ffffff;
+            --background-dark: #1f1f1f;
+            --text-light: #333333;
+            --text-dark: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            color: var(--text-light);
+        }
+
+        .dark-mode {
+            background-color: var(--background-dark);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .balance {
+            background-color: var(--secondary-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .betting-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .matches-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .match-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .odds-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .odd-button {
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .odd-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .bet-slip {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .bet-slip-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .bet-list {
+            margin-bottom: 15px;
+        }
+
+        .bet-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .stake-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .place-bet-button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .place-bet-button:hover {
+            background-color: #2d8f47;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 300px;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>BetPlay</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#sports">Sports</a>
+                <a href="#live">Live</a>
+                <a href="#casino">Casino</a>
+                <a href="#promotions">Promotions</a>
+            </div>
+            <div class="user-section">
+                <div class="balance">Balance: $1000.00</div>
+                <button onclick="showDepositModal()">Deposit</button>
+                <button onclick="toggleDarkMode()">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main>
+            <section class="betting-section">
+                <h2>Live Matches</h2>
+                <div class="matches-list" id="matches-list">
+                    <!-- Matches will be added dynamically -->
+                </div>
+            </section>
+
+            <section class="bet-slip">
+                <div class="bet-slip-header">
+                    <h3>Bet Slip</h3>
+                    <button onclick="clearBetSlip()">Clear All</button>
+                </div>
+                <div class="bet-list" id="bet-list">
+                    <!-- Bets will be added dynamically -->
+                </div>
+                <input type="number" class="stake-input" placeholder="Enter stake amount">
+                <button class="place-bet-button" onclick="placeBet()">Place Bet</button>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal" id="deposit-modal">
+        <div class="modal-content">
+            <h2>Deposit Funds</h2>
+            <form onsubmit="handleDeposit(event)">
+                <input type="number" placeholder="Enter amount" required>
+                <button type="submit">Deposit</button>
+                <button type="button" onclick="closeModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample match data
+        const matches = [
+            {
+                id: 1,
+                sport: 'Football',
+                teams: ['Manchester United', 'Liverpool'],
+                time: 'Live',
+                score: '2-1',
+                odds: {
+                    home: 2.1,
+                    draw: 3.4,
+                    away: 3.2
+                }
+            },
+            {
+                id: 2,
+                sport: 'Cricket',
+                teams: ['India', 'Australia'],
+                time: 'Live',
+                score: '245/6',
+                odds: {
+                    home: 1.8,
+                    draw: 4.5,
+                    away: 2.0
+                }
+            }
+        ];
+
+        let selectedBets = [];
+        let darkMode = false;
+
+        // Check user session
+        function checkSession() {
+            const user = JSON.parse(sessionStorage.getItem('currentUser'));
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Update balance display
+            document.querySelector('.balance').textContent = `Balance: $${user.balance.toFixed(2)}`;
+        }
+
+        // Initialize the application
+        function init() {
+            checkSession();
+            renderMatches();
+            loadBetSlip();
+        }
+
+        // Render matches
+        function renderMatches() {
+            const matchesList = document.getElementById('matches-list');
+            matchesList.innerHTML = matches.map(match => `
+                <div class="match-card">
+                    <div class="match-header">
+                        <div>${match.sport}</div>
+                        <div>${match.time}</div>
+                    </div>
+                    <div class="match-teams">
+                        ${match.teams[0]} vs ${match.teams[1]}
+                    </div>
+                    <div class="match-score">${match.score}</div>
+                    <div class="odds-grid">
+                        <div class="odd-button" onclick="addBet(${match.id}, '1', ${match.odds.home})">
+                            1: ${match.odds.home}
+                        </div>
+                        <div class="odd-button" onclick="addBet(${match.id}, 'X', ${match.odds.draw})">
+                            X: ${match.odds.draw}
+                        </div>
+                        <div class="odd-button" onclick="addBet(${match.id}, '2', ${match.odds.away})">
+                            2: ${match.odds.away}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add bet to slip
+        function addBet(matchId, selection, odds) {
+            const match = matches.find(m => m.id === matchId);
+            selectedBets.push({
+                matchId,
+                teams: match.teams,
+                selection,
+                odds
+            });
+            loadBetSlip();
+        }
+
+        // Load bet slip
+        function loadBetSlip() {
+            const betList = document.getElementById('bet-list');
+            betList.innerHTML = selectedBets.map(bet => `
+                <div class="bet-item">
+                    <div>${bet.teams[0]} vs ${bet.teams[1]}</div>
+                    <div>Selection: ${bet.selection}</div>
+                    <div>Odds: ${bet.odds}</div>
+                </div>
+            `).join('');
+        }
+
+        // Clear bet slip
+        function clearBetSlip() {
+            selectedBets = [];
+            loadBetSlip();
+        }
+
+        // Place bet
+        function placeBet() {
+            if (selectedBets.length === 0) {
+                alert('Please select at least one bet');
+                return;
+            }
+
+            const stake = document.querySelector('.stake-input').value;
+            if (!stake || stake <= 0) {
+                alert('Please enter a valid stake amount');
+                return;
+            }
+
+            // Here you would typically send the bet to a backend server
+            alert('Bet placed successfully!');
+            clearBetSlip();
+        }
+
+        // Show deposit modal
+        function showDepositModal() {
+            document.getElementById('deposit-modal').style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('deposit-modal').style.display = 'none';
+        }
+
+        // Handle deposit
+        function handleDeposit(event) {
+            event.preventDefault();
+            const amount = parseFloat(event.target.querySelector('input').value);
+            const user = JSON.parse(sessionStorage.getItem('currentUser'));
+            
+            user.balance += amount;
+            sessionStorage.setItem('currentUser', JSON.stringify(user));
+            document.querySelector('.balance').textContent = `Balance: $${user.balance.toFixed(2)}`;
+            
+            alert(`Deposit of $${amount} processed successfully!`);
+            closeModal();
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode');
+        }
+
+        // Add logout function
+        function logout() {
+            sessionStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize when page loads
+        window.onload = init;
+    </script>
+</body>
+</html> 
